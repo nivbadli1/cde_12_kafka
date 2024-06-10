@@ -1,3 +1,34 @@
+# Kafka Docker Compose Installation Guide
+
+This repository contains a Docker Compose file and instructions for setting up a Kafka cluster along with Kafdrop for Kafka visualization. It also includes an exercise to help you familiarize yourself with Kafka and Docker.
+
+## Instructions
+
+Follow these steps to set up the Kafka cluster using Docker Compose and verify that all containers are running correctly:
+
+1. Clone this repository to your local machine.
+
+3. Navigate to the root directory of the cloned repository in your terminal.
+
+4. Run the following command to start the Kafka cluster:
+    ```bash
+    docker-compose up
+    ```
+
+5. Once all containers are up and running, verify their status by running:
+    ```bash
+    docker ps
+    ```
+
+    ```bash
+    CONTAINER ID   IMAGE                             COMMAND                  CREATED         STATUS              PORTS                                              NAMES
+    2e3e2f570611   obsidiandynamics/kafdrop:3.30.0   "/kafdrop.sh"            2 minutes ago   Up About a minute   0.0.0.0:9003->9000/tcp                             cde_12_kafka-kafdrop-1
+    f36a4b46d23a   confluentinc/cp-kafka:6.2.0       "/etc/confluent/dock…"   2 minutes ago   Up 2 minutes        0.0.0.0:9092->9092/tcp, 0.0.0.0:29092->29092/tcp   kafka-learn
+    e56de1bfc415   confluentinc/cp-zookeeper:6.2.0   "/etc/confluent/dock…"   2 minutes ago   Up 2 minutes        2888/tcp, 0.0.0.0:2181->2181/tcp, 3888/tcp         zookeeper-learn
+    ```
+
+6. Open your web browser and navigate to [http://localhost:9003](http://localhost:9003) to access Kafdrop, a Kafka UI for monitoring topics and messages.
+
 ## Exercise: Real-time User Clickstream Data Processing with Confluent Kafka
 
 In this exercise, you will simulate user click events and process them in real-time using Confluent Kafka in Python.
