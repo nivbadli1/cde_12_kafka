@@ -1,22 +1,20 @@
 #%%
-from confluent_kafka import Producer
+from kafka import KafkaProducer
 import random
 import time
 
-bootstrap_servers = 'localhost:29092'
+bootstrap_servers = 'course-kafka:9092'
 clickstream_topic = 'user_clickstream'
 
 def delivery_report(err, msg):
     if err is not None:
         print('Message delivery failed: {}'.format(err))
     else:
-        print('Message: {} delivered to {} [{}]'.format(msg, msg.topic(), msg.partition()))
-
+        print('Message: {} delivered to {} [{}]'.format(msg.value, msg.topic, msg.partition))
 
 def generate_click_event():
     """
     Generate a simulated click event.
-
     Returns:
         str: A string representing the click event.
     """
@@ -24,24 +22,33 @@ def generate_click_event():
     user_id = random.randint(1, 100)
     url = "/page" + str(random.randint(1, 10))
     timestamp = time.time()
-    return f"User {user_id} clicked on {url} at {timestamp}"  
+    return f"User {user_id} clicked on {url} at {timestamp}"
 
 def produce_click_events():
     """
     Produce simulated click events to Kafka.
     """
-    # Kafka producer configuration
-    conf = {'bootstrap.servers': bootstrap_servers}
-    # Create Kafka Producer instance
-    producer = Producer(**conf)
+    # Create KafkaProducer instance
+    producer = KafkaProducer(
+        bootstrap_servers=bootstrap_servers,
+        value_serializer=lambda x: x.encode('utf-8')
+    )
+    
     try:
         while True:
             # Generate a simulated click event
             click_event = generate_click_event()
+            
             # Publish the click event to Kafka
-            producer.produce(clickstream_topic, value=click_event.encode('utf-8'),callback=delivery_report)
-            # Poll for events, set timeout to 0 for non-blocking behavior
+            future = producer.send(clickstream_topic, value=click_event)
+            # Get event results
+            record_metadata = future.get(timeout=10)
+            # Report
+            print(f"Message sent to {record_metadata.topic} partition {record_metadata.partition} offset {record_metadata.offset}")
+            
+            # Ensure all messages are sent
             producer.flush()
+            
             # Wait for 1 second before producing the next click event
             time.sleep(1)
     except KeyboardInterrupt:
@@ -49,8 +56,6 @@ def produce_click_events():
     finally:
         # Close the Kafka producer
         producer.close()
-
 #%%
 produce_click_events()
-
 # %%
